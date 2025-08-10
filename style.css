@@ -1,0 +1,300 @@
+:root {
+    --green: #00ff88;
+    --yellow: #ffdd00;
+    --blue: #00aaff;
+    --black: #0a0a0a;
+    --dark-glass: rgba(0, 0, 0, 0.5);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --text: #e0e0e0;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, var(--black), #0f0f0f);
+    color: var(--text);
+    padding: 20px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: auto;
+}
+
+h1 {
+    text-align: center;
+    font-size: 2.5rem;
+    background: linear-gradient(45deg, var(--green), var(--blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 30px;
+}
+
+.config-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.config-item {
+    background: var(--dark-glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 15px;
+    padding: 15px 20px;
+    backdrop-filter: blur(10px);
+}
+
+.config-item label {
+    color: var(--yellow);
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+.config-item input,
+.config-item select {
+    background: rgba(0, 0, 0, 0.4);
+    color: var(--text);
+    border: 1px solid var(--blue);
+    padding: 8px 12px;
+    border-radius: 10px;
+}
+
+.filters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 25px;
+    margin-bottom: 40px;
+}
+
+.filter-card {
+    background: var(--dark-glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 20px;
+    backdrop-filter: blur(12px);
+}
+
+.filter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.filter-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--yellow);
+}
+
+.toggle-btn {
+    background: linear-gradient(135deg, var(--blue), var(--green));
+    color: var(--black);
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+.toggle-btn.active {
+    background: var(--green);
+}
+
+.range-inputs {
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.range-inputs.active {
+    display: flex;
+}
+
+.range-input-group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.range-input-group label {
+    color: var(--blue);
+    font-weight: bold;
+    min-width: 40px;
+}
+
+.range-input-group input {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.4);
+    color: var(--text);
+    border: 1px solid var(--blue);
+    padding: 8px;
+    border-radius: 10px;
+}
+
+textarea {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    color: var(--text);
+    border: 1px solid var(--blue);
+    padding: 12px;
+    border-radius: 10px;
+    resize: vertical;
+    min-height: 80px;
+}
+
+.combinations-area {
+    background: var(--dark-glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 20px;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.combinations-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 15px;
+}
+
+.combination-item {
+    background: rgba(0, 0, 0, 0.5);
+    border-left: 3px solid var(--green);
+    padding: 10px;
+    border-radius: 10px;
+    font-family: 'Courier New', monospace;
+}
+
+.large.blue {
+    border: 1px solid var(--yellow);
+    border-radius: 50%;
+    padding: 2px 4px;
+    margin: 0 2px;
+    color: var(--blue);
+    font-weight: bold;
+}
+
+.search-box {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    color: var(--text);
+    border: 1px solid var(--blue);
+    padding: 10px;
+    border-radius: 25px;
+    margin-bottom: 15px;
+    font-size: 1rem;
+}
+
+.group-frame {
+    border: 1px solid var(--green);
+    border-radius: 15px;
+    padding: 15px;
+    margin-top: 15px;
+    max-height: 300px;
+    overflow-y: auto;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.global-min {
+    margin-bottom: 10px;
+}
+
+.global-min label {
+    color: var(--yellow);
+    margin-right: 5px;
+}
+
+.yellow-input {
+    background: var(--yellow);
+    color: var(--black);
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.add-filter-btn {
+    background: var(--yellow);
+    color: var(--black);
+    border: none;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.remove-filter-btn {
+    background: var(--blue);
+    color: var(--black);
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    margin-left: 5px;
+}
+
+/* Boutons flottants : compteur à droite, réinitialisation à gauche */
+.floating-counter {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, var(--green), var(--yellow));
+    color: var(--black);
+    padding: 12px 20px;
+    border-radius: 50%;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 1000;
+    box-shadow: 0 0 10px var(--green);
+    user-select: none;
+}
+
+.floating-btn {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background: linear-gradient(135deg, var(--yellow), var(--green));
+    color: var(--black);
+    padding: 12px 20px;
+    border-radius: 50%;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 1000;
+    box-shadow: 0 0 10px var(--yellow);
+    user-select: none;
+}
+
+.logo-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: clamp(10px, 2vw, 20px);
+    margin: 20px 0;
+    flex-wrap: wrap;
+}
+
+.logo-circle {
+    width: clamp(60px, 12vmin, 120px);
+    height: clamp(60px, 12vmin, 120px);
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--green);
+    box-shadow: 0 0 15px var(--green);
+    transition: transform 0.3s ease;
+}
+
+.logo-circle:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 25px var(--yellow);
+}
