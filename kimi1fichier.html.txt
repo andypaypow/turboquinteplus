@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Filtrage de Combinaisons de Chevaux - Interface Futuriste</title>
+    <style>
+        :root {
+            --green: #00ff88;
+            --yellow: #ffdd00;
+            --blue: #00aaff;
+            --black: #0a0a0a;
+            --dark-gray: #1a1a1a;
+            --light-gray: #2a2a2a;
+            --text: #e0e0e0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--black) 0%, var(--dark-gray) 100%);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(45deg, var(--green), var(--blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+        }
+
+        .config-bar {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .config-item {
+            background: var(--light-gray);
+            padding: 15px 25px;
+            border-radius: 10px;
+            border: 1px solid var(--green);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
+        }
+
+        .config-item label {
+            color: var(--yellow);
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        .config-item input, .config-item select {
+            background: var(--black);
+            color: var(--text);
+            border: 1px solid var(--blue);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .filter-card {
+            background: linear-gradient(135deg, var(--light-gray), var(--dark-gray));
+            border: 1px solid var(--green);
+            border-radius: 15px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .filter-card:hover {
+            box-shadow: 0 0 25px rgba(0, 255, 136, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .filter-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(0, 255, 136, 0.1), transparent);
+            transform: rotate(45deg);
+            transition: all 0.5s;
+            opacity: 0;
+        }
+
+        .filter-card:hover::before {
+            opacity: 1;
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        .filter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .filter-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--yellow);
+        }
+
+        .toggle-btn {
+            background: var(--blue);
+            color: var(--black);
+            border: none;
+            padding: 5px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-btn.active {
+            background: var(--green);
+            box-shadow: 0 0 10px var(--green);
+        }
+
+        .range-inputs {
+            display: none;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .range-inputs.active {
+            display: flex;
+        }
+
+        .range-input-group {
+            flex: 1;
+        }
+
+        .range-input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--blue);
+            font-size: 0.9rem;
+        }
+
+        .range-input-group input {
+            width: 100%;
+            background: var(--black);
+            color: var(--text);
+            border: 1px solid var(--blue);
+            padding: 8px;
+            border-radius: 5px;
+        }
+
+        .combinations-area {
+            background: var(--light-gray);
+            border: 1px solid var(--green);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .combinations-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .search-box {
+            background: var(--black);
+            color: var(--text);
+            border: 1px solid var(--yellow);
+            padding: 10px 15px;
+            border-radius: 25px;
+            width: 300px;
+            max-width: 100%;
+        }
+
+        .combinations-list {
+            max-height: 400px;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+            padding: 10px;
+        }
+
+        .combination-item {
+            background: var(--dark-gray);
+            padding: 10px;
+            border-radius: 8px;
+            border-left: 3px solid var(--green);
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s ease;
+        }
+
+        .combination-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+        }
+
+        .even-number {
+            color: var(--blue);
+            font-weight: bold;
+        }
+
+        .large-number {
+            border: 1px solid var(--yellow);
+            border-radius: 50%;
+            padding: 2px 6px;
+            margin: 0 2px;
+        }
+
+        .consecutive-sequence {
+            text-decoration: underline;
+            text-decoration-color: var(--green);
+        }
+
+        .floating-counter {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, var(--green), var(--yellow));
+            color: var(--black);
+            padding: 15px 25px;
+            border-radius: 50px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            user-select: none;
+        }
+
+        .floating-counter:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.8);
+        }
+
+        .stats-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--light-gray);
+            border: 2px solid var(--green);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 70vh;
+            overflow-y: auto;
+            z-index: 2000;
+        }
+
+        .stats-modal h3 {
+            color: var(--yellow);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: var(--red);
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .reset-btn {
+            background: linear-gradient(135deg, var(--yellow), var(--green));
+            color: var(--black);
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0 auto;
+            display: block;
+        }
+
+        .reset-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 221, 0, 0.4);
+        }
+
+        .group-input-area {
+            display: none;
+            margin-top: 15px;
+        }
+
+        .group-input-area textarea {
+            width: 100%;
+            height: 100px;
+            background: var(--black);
+            color: var(--text);
+            border: 1px solid var(--blue);
+            padding: 10px;
+            border-radius: 5px;
+            resize: vertical;
+        }
+
+        .weight-config {
+            display: none;
+            margin-top: 15px;
+        }
+
+        .weight-input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .weight-input-group input {
+            flex: 1;
+            background: var(--black);
+            color: var(--text);
+            border: 1px solid var(--blue);
+            padding: 5px;
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--dark-gray);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--green);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--yellow);
+        }
+
+        @media (max-width: 768px) {
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .config-bar {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .search-box {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Filtrage de Combinaisons de Chevaux</h1>
+            <p style="color: var(--blue);">Optimisez vos stratégies de turf avec l'IA futuriste</p>
+        </div>
+
+        <div class="config-bar">
+            <div class="config-item">
+                <label>Nombre de partants:</label>
+                <select id="partantsSelect">
+                    <option value="15">15</option>
+                    <option value="16">16</option>
+                    <option value="17">17</option>
+                    <option value="18">18</option>
+                    <option value="19">19</option>
+                    <option value="20">20</option>
+                </select>
+            </div>
+            <div class="config-item">
+                <label>Taille combinaison:</label>
+                <select id="tailleSelect">
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                </select>
+            </div>
+            <button class="toggle-btn" onclick="generateCombinations()">Générer Combinaisons</button>
+        </div>
+
+        <div class="filters-grid">
+            <div class="filter-card">
+                <div class="filter-header">
+                    <span class="filter-title">Tri Groupe</span>
+                    <button class="toggle-btn" onclick="toggleFilter('groupe')">Activer</button>
+                </div>
+                <div class="group-input-area" id="groupe-input">
+                    <textarea placeholder="Collez vos groupes ici (ex: Groupe1: 1-2-3-4-5-6-7-8)"></textarea>
+                    <button class="toggle-btn" onclick="analyzeGroups()">Analyser</button>
+                </div>
+            </div>
+
+            <div class="filter-card">
+                <div class="filter-header">
+                    <span class="filter-title">Pairs</span>
+                    <button class="toggle-btn" onclick="toggleFilter('pairs')">Activer</button>
+                </div>
+                <div class="range-inputs" id="pairs-range">
+                    <div class="range-input-group">
+                        <label>Min</label>
+                        <input type="number" id="pairsMin" min="0" max="8" value="0">
+                    </div>
+                    <div class="range-input-group">
+                        <label>Max</label>
+                        <input type="number" id="pairsMax" min="0" max="8" value="8">
+                    </div>
+                </div>
+            </div>
+
+            <div class="filter-card">
+                <div class="filter-header">
+                    <span class="filter-title">Impairs</span>
+                    <button class="toggle-btn" onclick="toggleFilter('impairs')">Activer</button>
+                </div>
+                <div class="range-inputs" id="impairs-range">
+                    <div class="range-input-group">
+                        <label>Min</label>
+                        <input type="number" id="impairsMin" min="0" max="8" value="0">
+                    </div>
+                    <div class="range-input-group">
+                        <label>Max</label>
+                        <input type="number" id="impairsMax" min="0" max="8" value="8">
+                    </div>
+                </div>
+            </div>
+
+            <div class="filter-card">
+                <div class="filter-header">
+                    <span class="filter-title">Petits Numéros</span>
+                    <button class="toggle-btn" onclick="toggleFilter('petits')">Activer</button>
+                </div>
+                <div class="range-inputs" id="petits-range">
+                    <div class="range-input-group">
+                        <label>Min</label>
+                        <input type="number" id="petitsMin" min="0" max="8" value="0">
+                    </div>
+                    <div class="range-input-group">
+                        <label>Max</label>
+                        <input type="number" id="petitsMax" min="0" max="8" value="8">
+                    </div>
+                </div>
+            </div>
+
+            <div class="filter-card">
+                <div class="filter-header">
+                    <span class="filter-title">Grands Numéros</span>
+                    <button class="toggle-btn" onclick="toggleFilter('grands')">Activer</button>
+                </div>
+                <div class="range-inputs" id="grands-range">
+                    <div class="range-input-group">
+                        <label>Min</label>
+                        <input type="number" id="grandsMin" min="0" max="8" value="0">
+                    </div>
+                    <div class="range-input-group">
+                        <label>Max</label>
+                        <input type="number" id="grandsMax" min="0" max="8" value="8">
+                    </div>
+                </div>
+            </div>
+
+            <div class="filter-card">
+                <div class="filter-header">
+                    <span class="filter-title">Consécutifs</span>
+                    <button class="toggle-btn" onclick="toggleFilter('consecutive')">Activer</button>
+                </div>
+                <div class="range-inputs" id="consecutive-range">
+                    <div class="range-input-group">
+                        <label>Min</label>
+                        <input type="number" id="consecutiveMin" min="0" max="8" value="0">
+                    </div>
+                    <div class="range-input-group">
+                        <label>Max</label>
+                        <input type="number" id="consecutiveMax" min="0" max="8" value="8">
+                    </div>
+                </div>
+            </div>
+
+            <div class="filter-card">
+                <div class="filter-header">
+                    <span class="filter-title">Somme Numérique</span>
+                    <button class="toggle-btn" onclick="toggleFilter('somme')">Activer</button>
+                </div>
+                <div class="range-inputs" id="somme-range">
+                    <div class="range-input-group">
+                        <label>Min</label>
+                        <input type="number" id="sommeMin" value="10">
+                    </div>
+                    <div class="range-input-group">
+                        <label>Max</label>
+                        <input type="number" id="sommeMax" value="54">
+                    </div>
+                </div>
+            </div>
+
+            <div class="filter-card">
+                <div class="filter-header">
+                    <span class="filter-title">Poids</span>
+                    <button class="toggle-btn" onclick="toggleFilter('poids')">Activer</button>
+                </div>
+                <div class="range-inputs" id="poids-range">
+                    <div class="range-input-group">
+                        <label>Min</label>
+                        <input type="number" id="poidsMin" value="10">
+                    </div>
+                    <div class="range-input-group">
+                        <label>Max</label>
+                        <input type="number" id="poidsMax" value="54">
+                    </div>
+                </div>
+                <div class="weight-config" id="weight-config">
+                    <button class="toggle-btn" onclick="configureWeights()">Configurer Poids</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="combinations-area">
+            <div class="combinations-header">
+                <h3 style="color: var(--yellow);">Combinaisons Filtrées</h3>
+                <input type="text" class="search-box" placeholder="Rechercher des numéros..." oninput="searchCombinations(this.value)">
+            </div>
+            <div class="combinations-list" id="combinationsList"></div>
+        </div>
+
+        <button class="reset-btn" onclick="resetAll()">Réinitialiser Tous les Filtres</button>
+    </div>
+
+    <div class="floating-counter" id="counter" onclick="showStats()">
+        0/0
+    </div>
+
+    <div class="stats-modal" id="statsModal">
+        <button class="close-modal" onclick="closeStats()">×</button>
+        <h3>Statistiques Détaillées</h3>
+        <div id="statsContent"></div>
+    </div>
+
+    <script>
+        let allCombinations = [];
+        let filteredCombinations = [];
+        let horseWeights = {};
+        let activeFilters = new Set();
+
+        function generateCombinations() {
+            const partants = parseInt(document.getElementById('partantsSelect').value);
+            const taille = parseInt(document.getElementById('tailleSelect').value);
+            
+            allCombinations = [];
+            generateCombinationsHelper([], 1, partants, taille);
+            filteredCombinations = [...allCombinations];
+            updateDisplay();
+            updateCounter();
+        }
+
+        function generateCombinationsHelper(current, start, end, size) {
+            if (size === 0) {
+                allCombinations.push([...current]);
+                return;
+            }
+            for (let i = start; i <= end - size + 1; i++) {
+                current.push(i);
+                generateCombinationsHelper(current, i + 1, end, size - 1);
+                current.pop();
+            }
+        }
+
+        function toggleFilter(filterName) {
+            const btn = event.target;
+            const rangeDiv = document.getElementById(filterName + '-range');
+            const groupInput = document.getElementById(filterName + '-input');
+            const weightConfig = document.getElementById('weight-config');
+
+            if (btn.classList.contains('active')) {
+                btn.classList.remove('active');
+                if (rangeDiv) rangeDiv.classList.remove('active');
+                if (groupInput) groupInput.style.display = 'none';
+                if (weightConfig && filterName === 'poids') weightConfig.style.display = 'none';
+                activeFilters.delete(filterName);
+            } else {
+                btn.classList.add('active');
+                if (rangeDiv) rangeDiv.classList.add('active');
+                if (groupInput) groupInput.style.display = 'block';
+                if (weightConfig && filterName === 'poids') weightConfig.style.display = 'block';
+                activeFilters.add(filterName);
+            }
+
+            applyFilters();
+        }
+
+        function applyFilters() {
+            filteredCombinations = [...allCombinations];
+
+            if (activeFilters.has('pairs')) {
+                const min = parseInt(document.getElementById('pairsMin').value);
+                const max = parseInt(document.getElementById('pairsMax').value);
+                filteredCombinations = filteredCombinations.filter(combo => {
+                    const pairs = combo.filter(n => n % 2 === 0).length;
+                    return pairs >= min && pairs <= max;
+                });
+            }
+
+            if (activeFilters.has('impairs')) {
+                const min = parseInt(document.getElementById('impairsMin').value);
+                const max = parseInt(document.getElementById('impairsMax').value);
+                filteredCombinations = filteredCombinations.filter(combo => {
+                    const impairs = combo.filter(n => n % 2 === 1).length;
+                    return impairs >= min && impairs <= max;
+                });
+            }
+
+            if (activeFilters.has('petits')) {
+                const min = parseInt(document.getElementById('petitsMin').value);
+                const max = parseInt(document.getElementById('petitsMax').value);
+                const limit = 10;
+                filteredCombinations = filteredCombinations.filter(combo => {
+                    const petits = combo.filter(n => n <= limit).length;
+                    return petits >= min && petits <= max;
+                });
+            }
+
+            if (activeFilters.has('grands')) {
+                const min = parseInt(document.getElementById('grandsMin').value);
+                const max = parseInt(document.getElementById('grandsMax').value);
+                const limit = 10;
+                filteredCombinations = filteredCombinations.filter(combo => {
+                    const grands = combo.filter(n => n > limit).length;
+                    return grands >= min && grands <= max;
+                });
+            }
+
+            if (activeFilters.has('consecutive')) {
+                const min = parseInt(document.getElementById('consecutiveMin').value);
+                const max = parseInt(document.getElementById('consecutiveMax').value);
+                filteredCombinations = filteredCombinations.filter(combo => {
+                    let maxConsecutive = 0;
+                    let current = 1;
+                    
+                    const sorted = [...combo].sort((a, b) => a - b);
+                    for (let i = 1; i < sorted.length; i++) {
+                        if (sorted[i] === sorted[i-1] + 1) {
+                            current++;
+                            maxConsecutive = Math.max(maxConsecutive, current);
+                        } else {
+                            current = 1;
+                        }
+                    }
+                    return maxConsecutive >= min && maxConsecutive <= max;
+                });
+            }
+
+            if (activeFilters.has('somme')) {
+                const min = parseInt(document.getElementById('sommeMin').value);
+                const max = parseInt(document.getElementById('sommeMax').value);
+                filteredCombinations = filteredCombinations.filter(combo => {
+                    const sum = combo.reduce((a, b) => a + b, 0);
+                    return sum >= min && sum <= max;
+                });
+            }
+
+            if (activeFilters.has('poids')) {
+                const min = parseInt(document.getElementById('poidsMin').value);
+                const max = parseInt(document.getElementById('poidsMax').value);
+                filteredCombinations = filteredCombinations.filter(combo => {
+                    const sum = combo.reduce((a, b) => a + (horseWeights[b] || b), 0);
+                    return sum >= min && sum <= max;
+                });
+            }
+
+            updateDisplay();
+            updateCounter();
+        }
+
+        function updateDisplay() {
+            const container = document.getElementById('combinationsList');
+            container.innerHTML = '';
+            
+            filteredCombinations.slice(0, 50).forEach(combo => {
+                const div = document.createElement('div');
+                div.className = 'combination-item';
+                
+                const formattedNumbers = combo.map(n => {
+                    let className = '';
+                    if (n % 2 === 0) className += ' even-number';
+                    if (n > 15) className += ' large-number';
+                    return `<span class="${className}">${n}</span>`;
+                }).join(' - ');
+                
+                div.innerHTML = formattedNumbers;
+                container.appendChild(div);
+            });
+
+            if (filteredCombinations.length > 50) {
+                const more = document.createElement('div');
+                more.textContent = `... et ${filteredCombinations.length - 50} autres`;
+                more.style.color = 'var(--yellow)';
+                more.style.textAlign = 'center';
+                more.style.padding = '20px';
+                container.appendChild(more);
+            }
+        }
+
+        function updateCounter() {
+            const counter = document.getElementById('counter');
+            counter.textContent = `${filteredCombinations.length}/${allCombinations.length}`;
+        }
+
+        function showStats() {
+            const modal = document.getElementById('statsModal');
+            const content = document.getElementById('statsContent');
+            
+            const frequency = {};
+            filteredCombinations.flat().forEach(num => {
+                frequency[num] = (frequency[num] || 0) + 1;
+            });
+
+            const sorted = Object.entries(frequency)
+                .sort((a, b) => b[1] - a[1])
+                .map(([num, count]) => `Cheval ${num}: ${count} occurrences`);
+
+            content.innerHTML = `
+                <h4>Top chevaux les plus fréquents:</h4>
+                <ol>
+                    ${sorted.slice(0, 10).map(item => `<li style="color:var(--green)">${item}</li>`).join('')}
+                </ol>
+                <h4>Statistiques globales:</h4>
+                <p style="color:var(--blue)">Total combinaisons: ${filteredCombinations.length}</p>
+                <p style="color:var(--yellow)">Taux de réduction: ${((1 - filteredCombinations.length/allCombinations.length) * 100).toFixed(1)}%</p>
+            `;
+
+            modal.style.display = 'block';
+        }
+
+        function closeStats() {
+            document.getElementById('statsModal').style.display = 'none';
+        }
+
+        function searchCombinations(query) {
+            if (!query) {
+                updateDisplay();
+                return;
+            }
+
+            const searchNumbers = query.split(/[,\s-]+/).map(n => parseInt(n.trim())).filter(n => !isNaN(n));
+            const filtered = filteredCombinations.filter(combo => 
+                searchNumbers.every(n => combo.includes(n))
+            );
+
+            const container = document.getElementById('combinationsList');
+            container.innerHTML = '';
+            
+            filtered.slice(0, 50).forEach(combo => {
+                const div = document.createElement('div');
+                div.className = 'combination-item';
+                div.innerHTML = combo.join(' - ');
+                container.appendChild(div);
+            });
+        }
+
+        function resetAll() {
+            activeFilters.clear();
+            document.querySelectorAll('.toggle-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelectorAll('.range-inputs').forEach(div => {
+                div.classList.remove('active');
+            });
+            document.querySelectorAll('.group-input-area').forEach(div => {
+                div.style.display = 'none';
+            });
+            document.querySelectorAll('.weight-config').forEach(div => {
+                div.style.display = 'none';
+            });
+            
+            filteredCombinations = [...allCombinations];
+            updateDisplay();
+            updateCounter();
+        }
+
+        function analyzeGroups() {
+            const textarea = document.querySelector('#groupe-input textarea');
+            const text = textarea.value;
+            const lines = text.split('\n').filter(line => line.trim());
+            
+            const groups = lines.map(line => {
+                const match = line.match(/(\d+(?:-\d+)*)/g);
+                return match ? match.flatMap(m => m.split('-').map(Number)) : [];
+            }).filter(g => g.length > 0);
+
+            console.log('Groupes analysés:', groups);
+            alert(`Analyse terminée: ${groups.length} groupes identifiés`);
+        }
+
+        function configureWeights() {
+            const partants = parseInt(document.getElementById('partantsSelect').value);
+            let html = '<h4>Configurer les poids des chevaux:</h4>';
+            
+            for (let i = 1; i <= partants; i++) {
+                const currentWeight = horseWeights[i] || i;
+                html += `
+                    <div class="weight-input-group">
+                        <label>Cheval ${i}:</label>
+                        <input type="number" value="${currentWeight}" min="1" max="100" 
+                               onchange="horseWeights[${i}] = parseInt(this.value)">
+                    </div>
+                `;
+            }
+            
+            html += '<button class="toggle-btn" onclick="closeWeightConfig()">Appliquer</button>';
+            document.getElementById('statsContent').innerHTML = html;
+            document.getElementById('statsModal').style.display = 'block';
+        }
+
+        function closeWeightConfig() {
+            closeStats();
+            applyFilters();
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', () => {
+            generateCombinations();
+        });
+
+        // Drag functionality for floating counter
+        let isDragging = false;
+        let offsetX, offsetY;
+        
+        const counter = document.getElementById('counter');
+        
+        counter.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            offsetX = e.clientX - counter.offsetLeft;
+            offsetY = e.clientY - counter.offsetTop;
+            counter.style.cursor = 'grabbing';
+        });
+        
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            
+            counter.style.left = (e.clientX - offsetX) + 'px';
+            counter.style.top = (e.clientY - offsetY) + 'px';
+            counter.style.right = 'auto';
+            counter.style.bottom = 'auto';
+        });
+        
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+            counter.style.cursor = 'pointer';
+        });
+
+        // Auto-update filters on input change
+        document.querySelectorAll('input[type="number"]').forEach(input => {
+            input.addEventListener('input', applyFilters);
+        });
+    </script>
+</body>
+</html>

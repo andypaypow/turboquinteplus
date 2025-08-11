@@ -23,6 +23,12 @@ function generateCombinations() {
     updateCounter();
 }
 
+// Force le démarrage du carrousel au chargement
+window.addEventListener('load', () => {
+    const carousel = document.getElementById('logoCarousel');
+    carousel.style.animationPlayState = 'running';
+});
+
 function updateSommeSequence() {
     const partants = parseInt(document.getElementById('partantsSelect').value);
     sommeSequence = Array.from({ length: partants }, (_, i) => i + 1);
@@ -116,13 +122,11 @@ function duplicateFilter(type) {
     }
 }
 
-// Application instantanée
 function applyFilters() {
     filteredCombinations = [...allCombinations];
     const petitLimit = parseInt(petitLimitInput.value);
     const seq = document.getElementById('sommeSequence')?.value.split(',').map(Number) || sommeSequence;
 
-    // Somme principale
     if (document.getElementById('somme-range')?.classList.contains('active')) {
         const min = parseInt(document.getElementById('sommeMin')?.value || 0);
         const max = parseInt(document.getElementById('sommeMax')?.value || 0);
@@ -132,7 +136,6 @@ function applyFilters() {
         });
     }
 
-    // Sommes ajoutées
     document.querySelectorAll('#somme-filters .filter-instance').forEach(div => {
         const min = parseInt(div.querySelector('input:nth-of-type(1)')?.value || 0);
         const max = parseInt(div.querySelector('input:nth-of-type(2)')?.value || 0);
@@ -142,8 +145,7 @@ function applyFilters() {
         });
     });
 
-    // Autres filtres
-    ['pairs', 'impairs', 'petits', 'grands', 'consecutive'].forEach(id => {
+    ['pairs', 'impairs', 'petits', 'grands'].forEach(id => {
         if (document.getElementById(id + '-range')?.classList.contains('active')) {
             const min = parseInt(document.getElementById(id + 'Min')?.value || 0);
             const max = parseInt(document.getElementById(id + 'Max')?.value || 8);
@@ -153,20 +155,11 @@ function applyFilters() {
                 case 'impairs': fn = c => c.filter(n => n % 2 === 1).length; break;
                 case 'petits': fn = c => c.filter(n => n <= petitLimit).length; break;
                 case 'grands': fn = c => c.filter(n => n > petitLimit).length; break;
-                case 'consecutive': fn = c => {
-                    let maxC = 0, cur = 1;
-                    const sorted = [...c].sort((a, b) => a - b);
-                    for (let i = 1; i < sorted.length; i++) {
-                        if (sorted[i] === sorted[i - 1] + 1) cur++; else { maxC = Math.max(maxC, cur); cur = 1; }
-                    }
-                    return Math.max(maxC, cur);
-                };
             }
             filteredCombinations = filteredCombinations.filter(c => fn(c) >= min && fn(c) <= max);
         }
     });
 
-    // Groupe
     if (groupData.length) {
         filteredCombinations = filteredCombinations.filter(combo => {
             return groupData.every(group => {
@@ -180,21 +173,23 @@ function applyFilters() {
     updateCounter();
 }
 
-// Affichage stylisé
 function updateDisplay() {
     const list = document.getElementById('combinationsList');
     list.innerHTML = '';
-    const html = filteredCombinations.slice(0, 100).map(combo => {
-        const formatted = combo.map(n => `<span class="large blue">${n}</span>`).join(' ');
-        return `<div class="combination-item">${formatted}</div>`;
-    }).join('');
+
+    const html = filteredCombinations.slice(0, 1000) // affiche jusqu'à 1000
+        .map(combo => {
+            const formatted = combo.map(n => `<span class="large blue">${n}</span>`).join(' ');
+            return `<div class="combination-item">${formatted}</div>`;
+        }).join('');
+
     list.innerHTML = html;
-    if (filteredCombinations.length > 100) {
-        list.innerHTML += `<div style="text-align:center;color:#ffdd00;">... et ${filteredCombinations.length - 100} autres</div>`;
+
+    if (filteredCombinations.length > 1000) {
+        list.innerHTML += `<div style="text-align:center;color:#ffdd00;">... et ${filteredCombinations.length - 1000} autres</div>`;
     }
 }
 
-// Recherche intelligente
 function searchNumbers(query) {
     const nums = query.split(/\s+/).map(Number).filter(n => !isNaN(n));
     if (!nums.length) { updateDisplay(); return; }
@@ -210,7 +205,6 @@ function updateCounter() {
     document.getElementById('counter').textContent = `${filteredCombinations.length}/${allCombinations.length}`;
 }
 
-// Statistiques enrichies
 function showStats() {
     const modal = document.getElementById('statsModal');
     const content = document.getElementById('statsContent');
@@ -237,5 +231,51 @@ function closeStats() {
 function resetAll() {
     location.reload();
 }
+
+function handleImageUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    Tesseract.recognize(file, 'eng+fra', {
+        logger: info => console.log(info)
+    }).then(({ data: { text } }) => {
+        document.getElementById('groupeImageTextarea').value = text;
+    });
+}
+
+function analyzeImageGroups() {
+    const rawText = document.getElementById('groupeImageTextarea').value;
+    const lines = rawText.split('\n').filter(l => l.trim());
+    const groups = [];
+
+    lines.forEach((line, index) => {
+        const nums = line.match(/\d+/g)?.map(Number);
+        if (nums && nums.length >= 4) {
+            groups.push({
+                id: `img-groupe-${index}`,
+                label: `Image Groupe ${index + 1}`,
+                numbers: [...new Set(nums)],
+                min: groupGlobalMin
+            });
+        }
+    });
+
+    groupData = groups;
+    renderGroupList();
+    autoSelectAllGroups();
+    applyFilters();
+}
+
+function rotateActiveLogo() {
+    const logos = document.querySelectorAll('.logo-item');
+    const active = document.querySelector('.logo-item.active');
+    const currentIndex = Array.from(logos).indexOf(active);
+    const nextIndex = (currentIndex + 1) % logos.length;
+
+    active.classList.remove('active');
+    logos[nextIndex].classList.add('active');
+}
+
+setInterval(rotateActiveLogo, 4000);
 
 generateCombinations();

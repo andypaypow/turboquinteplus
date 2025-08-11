@@ -155,8 +155,8 @@ textarea {
     border: 1px solid var(--glass-border);
     border-radius: 20px;
     padding: 20px;
-    max-height: 500px;
-    overflow-y: auto;
+    max-height: 500px; /* hauteur fixe */
+    overflow-y: auto;  /* barre de défilement */
 }
 
 .combinations-list {
@@ -244,7 +244,7 @@ textarea {
     margin-left: 5px;
 }
 
-/* Boutons flottants : compteur à droite, réinitialisation à gauche */
+/* Boutons flottants */
 .floating-counter {
     position: fixed;
     bottom: 20px;
@@ -275,26 +275,55 @@ textarea {
     user-select: none;
 }
 
-.logo-wrapper {
+/* Carrousel */
+.logo-carousel-wrapper {
+    overflow: hidden;
+    width: 100%;
+    height: 100px;
+    position: relative;
+}
+
+.logo-carousel {
     display: flex;
-    justify-content: center;
     align-items: center;
-    gap: clamp(10px, 2vw, 20px);
-    margin: 20px 0;
-    flex-wrap: wrap;
+    gap: 30px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    animation: scrollLogos 20s linear infinite;
+    white-space: nowrap;
+}
+
+.logo-item {
+    height: 80px;
+    width: auto;
+    object-fit: contain;
+    flex-shrink: 0;
 }
 
 .logo-circle {
-    width: clamp(60px, 12vmin, 120px);
-    height: clamp(60px, 12vmin, 120px);
     border-radius: 50%;
-    object-fit: cover;
     border: 2px solid var(--green);
-    box-shadow: 0 0 15px var(--green);
-    transition: transform 0.3s ease;
+    box-shadow: 0 0 10px var(--green);
 }
 
-.logo-circle:hover {
+.logo-rect {
+    border-radius: 10px;
+    border: 2px solid var(--green);
+    box-shadow: 0 0 10px var(--green);
+}
+
+.logo-item.active {
     transform: scale(1.1);
     box-shadow: 0 0 25px var(--yellow);
+    border-color: var(--yellow);
+}
+
+@keyframes scrollLogos {
+    0% {
+        transform: translateX(100vw);
+    }
+    100% {
+        transform: translateX(-100%);
+    }
 }

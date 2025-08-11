@@ -3,35 +3,47 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Turbo Quinté +</title>
+    <title>Gosen Filtre Pro V1</title>
     <link rel="stylesheet" href="style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.0/dist/tesseract.min.js"></script>
 </head>
 <body>
     <div class="container">
-        <h1>Turbo Quinté +</h1>
-        <!-- Logos circulaires -->
-<div class="logo-wrapper">
-    <img src="logo.webp" alt="Gosen MarkeT" class="logo-circle">
-</div>
+        <h1>Gosen Filter Pro</h1>
+
+        <!-- Carrousel de logos -->
+        <div class="logo-carousel-wrapper">
+            <div class="logo-carousel" id="logoCarousel">
+                <img src="logo.webp" alt="Logo Gosen" class="logo-item logo-circle active">
+                <img src="educalims.webp" alt="Logo Educalims" class="logo-item logo-rect">
+            </div>
+        </div>
 
         <!-- Configuration -->
         <div class="config-bar">
             <div class="config-item">
-                <label>Nombre de partants</label>
+                <label>Partants</label>
                 <select id="partantsSelect" onchange="generateCombinations()">
-                    <option value="15">15</option><option value="16">16</option><option value="17">17</option>
-                    <option value="18">18</option><option value="19">19</option><option value="20">20</option>
+                    <option value="15">15</option>
+                    <option value="16">16</option>
+                    <option value="17">17</option>
+                    <option value="18">18</option>
+                    <option value="19">19</option>
+                    <option value="20">20</option>
                 </select>
             </div>
             <div class="config-item">
-                <label>Taille combinaison</label>
+                <label>Taille</label>
                 <select id="tailleSelect" onchange="generateCombinations()">
-                    <option value="4">4</option><option value="5">5</option><option value="6">6</option>
-                    <option value="7">7</option><option value="8">8</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
                 </select>
             </div>
             <div class="config-item">
-                <label>Limite petits numéros</label>
+                <label>Petits numéros</label>
                 <input type="number" id="petitLimit" value="10" min="1" max="20" oninput="applyFilters()" />
             </div>
         </div>
@@ -53,9 +65,27 @@
                 <div class="group-frame" id="groupe-frame">
                     <div class="global-min">
                         <label>Min global à conserver</label>
-                        <input type="number" min="0" max="8" value="3" class="yellow-input" oninput="updateGlobalMin(this.value)" />
+                        <input type="number" min="0" max="8" value="3" class="yellow-input"
+                            oninput="updateGlobalMin(this.value)" />
                     </div>
                     <div id="groupe-filters" class="scroll-frame"></div>
+                </div>
+            </div>
+
+            <!-- Tri Groupe via image -->
+            <div class="filter-card">
+                <div class="filter-header">
+                    <span class="filter-title">Tri Groupe (via image)</span>
+                    <button class="toggle-btn" onclick="toggleFilter('groupeImage')">Activer</button>
+                    <input type="file" id="imageInput" accept="image/*" style="display:none"
+                        onchange="handleImageUpload(event)">
+                    <button class="add-filter-btn" onclick="document.getElementById('imageInput').click()">📷</button>
+                </div>
+                <div class="group-frame" id="groupeImage-frame">
+                    <textarea placeholder="Les groupes extraits de l'image apparaîtront ici..."
+                        id="groupeImageTextarea"></textarea>
+                    <button class="toggle-btn" onclick="analyzeImageGroups()">Analyser</button>
+                    <div id="groupeImage-filters" class="scroll-frame"></div>
                 </div>
             </div>
 
@@ -67,10 +97,13 @@
                     <button class="add-filter-btn" onclick="duplicateFilter('somme')" title="Dupliquer">+</button>
                 </div>
                 <div class="range-inputs" id="somme-range">
-                    <div class="range-input-group"><label>Min</label><input type="number" id="sommeMin" value="10" oninput="applyFilters()" /></div>
-                    <div class="range-input-group"><label>Max</label><input type="number" id="sommeMax" value="54" oninput="applyFilters()" /></div>
+                    <div class="range-input-group"><label>Min</label><input type="number" id="sommeMin" value="10"
+                            oninput="applyFilters()" /></div>
+                    <div class="range-input-group"><label>Max</label><input type="number" id="sommeMax" value="54"
+                            oninput="applyFilters()" /></div>
                     <label>Séquence personnalisée</label>
-                    <input type="text" id="sommeSequence" value="1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16" oninput="applyFilters()" placeholder="1,2,3..." />
+                    <input type="text" id="sommeSequence" value="1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16"
+                        oninput="applyFilters()" placeholder="1,2,3..." />
                 </div>
                 <div id="somme-filters"></div>
             </div>
@@ -94,15 +127,16 @@
         </div>
 
         <!-- Barre de recherche + combinaisons -->
-        <input type="text" class="search-box" id="searchBox" placeholder="Rechercher des numéros (ex: 3 7 12)" oninput="searchNumbers(this.value)" />
+        <input type="text" class="search-box" id="searchBox" placeholder="Rechercher des numéros (ex: 3 7 12)"
+            oninput="searchNumbers(this.value)" />
         <div class="combinations-area">
             <div class="combinations-list" id="combinationsList"></div>
         </div>
 
-    <!-- Boutons flottants -->
-    <div class="floating-btn" id="resetBtn" onclick="resetAll()" title="Réinitialiser">↻</div>
-    <div class="floating-counter" id="counter" onclick="showStats()" title="Statistiques">0/0</div>
+        <!-- Boutons flottants -->
+        <div class="floating-btn" id="resetBtn" onclick="resetAll()" title="Réinitialiser">↻</div>
+        <div class="floating-counter" id="counter" onclick="showStats()" title="Statistiques">0/0</div>
 
-    <script src="script.js"></script>
+        <script src="script.js"></script>
 </body>
 </html>
