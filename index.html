@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,6 +8,7 @@
     <link rel="stylesheet" href="style.css" />
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.0/dist/tesseract.min.js"></script>
 </head>
+
 <body>
     <div class="container">
         <h1>Gosen Filter Pro</h1>
@@ -24,6 +26,13 @@
             <div class="config-item">
                 <label>Partants</label>
                 <select id="partantsSelect" onchange="generateCombinations()">
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10</option>
+                    <option value="11">11</option>
+                    <option value="12">12</option>
+                    <option value="13">13</option>
+                    <option value="14">14</option>
                     <option value="15">15</option>
                     <option value="16">16</option>
                     <option value="17">17</option>
@@ -43,6 +52,10 @@
                 </select>
             </div>
             <div class="config-item">
+                <label>Non-partants</label>
+                <input type="text" id="nonPartantsInput" placeholder="ex: 3,7,12" oninput="generateCombinations()" />
+            </div>
+            <div class="config-item">
                 <label>Petits numéros</label>
                 <input type="number" id="petitLimit" value="10" min="1" max="20" oninput="applyFilters()" />
             </div>
@@ -57,86 +70,117 @@
                     <button class="toggle-btn" onclick="toggleFilter('groupe')">Activer</button>
                     <button class="add-filter-btn" onclick="duplicateFilter('groupe')" title="Dupliquer">+</button>
                 </div>
+
                 <div class="group-input-area" id="groupe-input">
-                    <textarea placeholder="Collez vos groupes 8 chevaux (ex: 1-2-3-4-5-6-7-8)"></textarea>
+                    <textarea
+                        placeholder="Collez ou écrivez vos groupes (ex: Favoris: 1 2 3 / Outsiders: 10,11-12 13)"></textarea>
+
+                    <button class="toggle-btn" onclick="document.getElementById('imageInput').click()">📷 Ajouter via
+                        image</button>
+                    <input type="file" id="imageInput" accept="image/*" style="display:none"
+                        onchange="handleImageUpload(event)" />
+
                     <button class="toggle-btn" onclick="analyzeGroups()">Analyser</button>
+
                     <div class="group-list" id="groupList"></div>
-                </div>
-                <div class="group-frame" id="groupe-frame">
+
+                    <div class="group-save-area">
+                        <input type="text" id="courseCode" placeholder="Ex: R1C7" />
+                        <input type="date" id="courseDate" />
+                        <button onclick="saveGroupSet()">💾 Sauvegarder</button>
+                        <button onclick="loadGroupSet()">📂 Charger</button>
+                        <select id="savedGroupSelect" onchange="loadSelectedGroup()">
+                            <option value="">-- Choisir une sauvegarde --</option>
+                        </select>
+                    </div>
+
                     <div class="global-min">
                         <label>Min global à conserver</label>
-                        <input type="number" min="0" max="8" value="3" class="yellow-input"
+                        <input type="number" id="globalMinInput" min="0" value="3" class="yellow-input"
                             oninput="updateGlobalMin(this.value)" />
                     </div>
+
                     <div id="groupe-filters" class="scroll-frame"></div>
                 </div>
             </div>
-
-            <!-- Tri Groupe via image -->
-            <div class="filter-card">
-                <div class="filter-header">
-                    <span class="filter-title">Tri Groupe (via image)</span>
-                    <button class="toggle-btn" onclick="toggleFilter('groupeImage')">Activer</button>
-                    <input type="file" id="imageInput" accept="image/*" style="display:none"
-                        onchange="handleImageUpload(event)">
-                    <button class="add-filter-btn" onclick="document.getElementById('imageInput').click()">📷</button>
-                </div>
-                <div class="group-frame" id="groupeImage-frame">
-                    <textarea placeholder="Les groupes extraits de l'image apparaîtront ici..."
-                        id="groupeImageTextarea"></textarea>
-                    <button class="toggle-btn" onclick="analyzeImageGroups()">Analyser</button>
-                    <div id="groupeImage-filters" class="scroll-frame"></div>
-                </div>
+        </div>
+        <!-- Somme Numérique -->
+        <div class="filter-card">
+            <div class="filter-header">
+                <span class="filter-title">Somme Numérique</span>
+                <button class="toggle-btn" onclick="toggleFilter('somme')">Activer</button>
+                <button class="add-filter-btn" onclick="duplicateFilter('somme')" title="Dupliquer">+</button>
             </div>
-
-            <!-- Somme Numérique -->
-            <div class="filter-card">
-                <div class="filter-header">
-                    <span class="filter-title">Somme Numérique</span>
-                    <button class="toggle-btn" onclick="toggleFilter('somme')">Activer</button>
-                    <button class="add-filter-btn" onclick="duplicateFilter('somme')" title="Dupliquer">+</button>
-                </div>
-                <div class="range-inputs" id="somme-range">
-                    <div class="range-input-group"><label>Min</label><input type="number" id="sommeMin" value="10"
-                            oninput="applyFilters()" /></div>
-                    <div class="range-input-group"><label>Max</label><input type="number" id="sommeMax" value="54"
-                            oninput="applyFilters()" /></div>
-                    <label>Séquence personnalisée</label>
-                    <input type="text" id="sommeSequence" value="1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16"
-                        oninput="applyFilters()" placeholder="1,2,3..." />
-                </div>
-                <div id="somme-filters"></div>
+            <div class="range-inputs" id="somme-range">
+                <div class="range-input-group"><label>Min</label><input type="number" id="sommeMin" value="10"
+                        oninput="applyFilters()" /></div>
+                <div class="range-input-group"><label>Max</label><input type="number" id="sommeMax" value="54"
+                        oninput="applyFilters()" /></div>
+                <label>Séquence personnalisée</label>
+                <input type="text" id="sommeSequence" value="1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16"
+                    oninput="applyFilters()" placeholder="1,2,3..." />
             </div>
-
-            <!-- Autres filtres -->
-            <div class="filter-card"><div class="filter-header"><span class="filter-title">Pairs</span><button class="toggle-btn" onclick="toggleFilter('pairs')">Activer</button></div>
-                <div class="range-inputs" id="pairs-range"><div class="range-input-group"><label>Min</label><input type="number" id="pairsMin" min="0" max="8" value="0" oninput="applyFilters()" /></div>
-                <div class="range-input-group"><label>Max</label><input type="number" id="pairsMax" min="0" max="8" value="8" oninput="applyFilters()" /></div></div></div>
-
-            <div class="filter-card"><div class="filter-header"><span class="filter-title">Impairs</span><button class="toggle-btn" onclick="toggleFilter('impairs')">Activer</button></div>
-                <div class="range-inputs" id="impairs-range"><div class="range-input-group"><label>Min</label><input type="number" id="impairsMin" min="0" max="8" value="0" oninput="applyFilters()" /></div>
-                <div class="range-input-group"><label>Max</label><input type="number" id="impairsMax" min="0" max="8" value="8" oninput="applyFilters()" /></div></div></div>
-
-            <div class="filter-card"><div class="filter-header"><span class="filter-title">Petits Numéros</span><button class="toggle-btn" onclick="toggleFilter('petits')">Activer</button></div>
-                <div class="range-inputs" id="petits-range"><div class="range-input-group"><label>Min</label><input type="number" id="petitsMin" min="0" max="8" value="0" oninput="applyFilters()" /></div>
-                <div class="range-input-group"><label>Max</label><input type="number" id="petitsMax" min="0" max="8" value="8" oninput="applyFilters()" /></div></div></div>
-
-            <div class="filter-card"><div class="filter-header"><span class="filter-title">Grands Numéros</span><button class="toggle-btn" onclick="toggleFilter('grands')">Activer</button></div>
-                <div class="range-inputs" id="grands-range"><div class="range-input-group"><label>Min</label><input type="number" id="grandsMin" min="0" max="8" value="0" oninput="applyFilters()" /></div>
-                <div class="range-input-group"><label>Max</label><input type="number" id="grandsMax" min="0" max="8" value="8" oninput="applyFilters()" /></div></div></div>
+            <div id="somme-filters"></div>
         </div>
 
-        <!-- Barre de recherche + combinaisons -->
-        <input type="text" class="search-box" id="searchBox" placeholder="Rechercher des numéros (ex: 3 7 12)"
-            oninput="searchNumbers(this.value)" />
-        <div class="combinations-area">
-            <div class="combinations-list" id="combinationsList"></div>
+        <!-- Autres filtres -->
+        <div class="filter-card">
+            <div class="filter-header"><span class="filter-title">Pairs</span><button class="toggle-btn"
+                    onclick="toggleFilter('pairs')">Activer</button></div>
+            <div class="range-inputs" id="pairs-range">
+                <div class="range-input-group"><label>Min</label><input type="number" id="pairsMin" min="0" max="8"
+                        value="0" oninput="applyFilters()" /></div>
+                <div class="range-input-group"><label>Max</label><input type="number" id="pairsMax" min="0" max="8"
+                        value="8" oninput="applyFilters()" /></div>
+            </div>
         </div>
 
-        <!-- Boutons flottants -->
-        <div class="floating-btn" id="resetBtn" onclick="resetAll()" title="Réinitialiser">↻</div>
-        <div class="floating-counter" id="counter" onclick="showStats()" title="Statistiques">0/0</div>
+        <div class="filter-card">
+            <div class="filter-header"><span class="filter-title">Impairs</span><button class="toggle-btn"
+                    onclick="toggleFilter('impairs')">Activer</button></div>
+            <div class="range-inputs" id="impairs-range">
+                <div class="range-input-group"><label>Min</label><input type="number" id="impairsMin" min="0" max="8"
+                        value="0" oninput="applyFilters()" /></div>
+                <div class="range-input-group"><label>Max</label><input type="number" id="impairsMax" min="0" max="8"
+                        value="8" oninput="applyFilters()" /></div>
+            </div>
+        </div>
 
-        <script src="script.js"></script>
+        <div class="filter-card">
+            <div class="filter-header"><span class="filter-title">Petits Numéros</span><button class="toggle-btn"
+                    onclick="toggleFilter('petits')">Activer</button></div>
+            <div class="range-inputs" id="petits-range">
+                <div class="range-input-group"><label>Min</label><input type="number" id="petitsMin" min="0" max="8"
+                        value="0" oninput="applyFilters()" /></div>
+                <div class="range-input-group"><label>Max</label><input type="number" id="petitsMax" min="0" max="8"
+                        value="8" oninput="applyFilters()" /></div>
+            </div>
+        </div>
+
+        <div class="filter-card">
+            <div class="filter-header"><span class="filter-title">Grands Numéros</span><button class="toggle-btn"
+                    onclick="toggleFilter('grands')">Activer</button></div>
+            <div class="range-inputs" id="grands-range">
+                <div class="range-input-group"><label>Min</label><input type="number" id="grandsMin" min="0" max="8"
+                        value="0" oninput="applyFilters()" /></div>
+                <div class="range-input-group"><label>Max</label><input type="number" id="grandsMax" min="0" max="8"
+                        value="8" oninput="applyFilters()" /></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Barre de recherche + combinaisons -->
+    <input type="text" class="search-box" id="searchBox" placeholder="Rechercher des numéros (ex: 3 7 12)"
+        oninput="searchNumbers(this.value)" />
+    <div class="combinations-area">
+        <div class="combinations-list" id="combinationsList"></div>
+    </div>
+
+    <!-- Boutons flottants -->
+    <div class="floating-btn" id="resetBtn" onclick="resetAll()" title="Réinitialiser">↻</div>
+    <div class="floating-counter" id="counter" onclick="showStats()" title="Statistiques">0/0</div>
+
+    <script src="script.js"></script>
 </body>
+
 </html>

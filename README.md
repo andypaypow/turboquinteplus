@@ -1,6 +1,6 @@
-# Application de Filtrage de Combinaisons de Chevaux (HTML, CSS, JS)
+# Application de Filtrage de Combinaisons de Chevaux 
 
-Bienvenue dans l'application de filtrage de combinaisons de chevaux, une solution moderne et futuriste conçue pour optimiser vos stratégies de jeux de type turf/loterie. Développée entièrement en HTML, CSS et JavaScript, cette application vise à réduire drastiquement le nombre de combinaisons possibles via des filtres dynamiques et une interface intuitive.
+Bienvenue dans l'application de filtrage de combinaisons de chevaux, une solution moderne et futuriste vert, jaune , bleu , fond noir conçue pour optimiser vos stratégies de jeux de type turf pour professionnels des courses hippiques. Développée entièrement en react, cette application vise à réduire drastiquement le nombre de combinaisons possibles via des filtres dynamiques et une interface intuitive.
 
 ## 1. Contexte et Objectif
 
@@ -13,7 +13,7 @@ L'interface utilisateur est conçue pour être réactive et visuellement attraya
 *   **Filtres Dynamiques :**
     *   Des boutons dédiés (Tri groupe, Pairs, Impairs, Consécutifs, Somme) permettent d'activer ou de désactiver les filtres d'un simple clic.
     *   L'activation d'un filtre affiche automatiquement des champs numériques `min/max` intelligents, pré-remplis avec des bornes calculées dynamiquement.
-*   **Les curseurs sont des Champs Numériques Intelligents :**
+*   **On appelle  curseurs, des Champs Numériques Intelligents :**
     *   Ces champs `min` et `max` s'ajustent en temps réel en fonction des filtres actifs.
     *   La contrainte `Min ≤ Max` est toujours respectée, avec un ajustement automatique en cas de conflit pour garantir la cohérence.
 *   **Zone de Combinaisons :**
@@ -36,11 +36,11 @@ Contrairement aux versions précédentes, les combinaisons initiales ne sont plu
 
 L'application propose une gamme complète de filtres pour un contrôle précis :
 
-*   **Filtre Groupe (avec Saisie des Groupes de Référence) :**
+*   **Filtre Groupe (avec Saisie des Groupes de Référence) :** il faudra prendre tout ton temps pour ce filtre car il est très important pour moi
     Il gère la saisie des données, leur analyse, pour afficher les groupes à filtrer.
 * saisie simple des numeros separés par des espaces, virgules ou tirets 
 * saisie multiples des groupes de combinaisons contenant du txte: L'utilisateur copie-colle une liste de texte dans une zone dédiée. Cette liste peut contenir à la fois des noms descriptifs et des combinaisons de numéros de 8 chevaux par groupe nommé.
- * Analyse automatique : , à l’interieur de ce filtre , analyse le texte pour distinguer les noms des combinaisons numériques. Pour chaque ligne, elle extrait la séquence de numéros tout en conservant ou en ignorant le titre des combinaisons.
+ * Analyse automatique par api gemini et par tesseract: , à l’interieur de ce filtre , analyse le texte pour distinguer les noms des combinaisons numériques. Pour chaque ligne, elle extrait la séquence de numéros tout en conservant ou en ignorant le titre des combinaisons.
  * Sélection par défaut : L'application identifie et sélectionne automatiquement toutes les combinaisons de 8 chevaux parmi celles saisies. 
  * Réduction initiale : L'utilisateur dispose de champs de numérotation pour entrer une valeur. Ce contrôle lui permet de choisir de garder un nombre minimum de numéros (par exemple, "au moins 2", "3", etc.) ou de supprimer un nombre maximum de numéros. Cette règle est ensuite appliquée à chaque combinaison individuellement (par exemple, la première combinaison garde 3 numéros, la deuxième en garde 3, etc.), réduisant ainsi la taille de la liste initiale.
     *   Possibilité d'ajouter un filtre de groupe supplémentaire via un petit bouton + discret.
@@ -115,4 +115,4 @@ L'application propose une gamme complète de filtres pour un contrôle précis :
 
 ## 9. Conclusion
 
-Cette application, développée avec une approche moderne et futuriste en HTML, CSS et JavaScript, offre une solution puissante et flexible pour les turfistes exigeants. Ses points forts résident dans l'adaptabilité des curseurs aux contraintes, la priorité donnée à l'utilisateur (les sélections manuelles prévalent sur les filtres automatiques) et une performance en temps réel, garantissant une expérience fluide et efficace.
+Cette application, développée avec une approche moderne et futuriste en react, offre une solution puissante et flexible pour les turfistes exigeants. Ses points forts résident dans l'adaptabilité des curseurs aux contraintes, la priorité donnée à l'utilisateur (les sélections manuelles prévalent sur les filtres automatiques) et une performance en temps réel, garantissant une expérience fluide et efficace.

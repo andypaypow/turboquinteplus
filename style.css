@@ -327,3 +327,50 @@ textarea {
         transform: translateX(-100%);
     }
 }
+
+.config-item input[type="text"] {
+    background: rgba(0, 0, 0, 0.4);
+    color: var(--text);
+    border: 1px solid var(--blue);
+    padding: 8px 12px;
+    border-radius: 10px;
+    min-width: 120px;
+}
+
+.config-item input[type="text"]:focus {
+    outline: none;
+    border-color: var(--green);
+    box-shadow: 0 0 5px var(--green);
+}
+
+.scroll-frame {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid var(--green);
+    padding: 10px;
+    margin-top: 10px;
+}
+
+.group-save-area {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.group-save-area input,
+.group-save-area select,
+.group-save-area button {
+  background: rgba(0, 0, 0, 0.4);
+  color: var(--text);
+  border: 1px solid var(--blue);
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+}
+
+.group-save-area button {
+  background: var(--green);
+  color: var(--black);
+  cursor: pointer;
+}

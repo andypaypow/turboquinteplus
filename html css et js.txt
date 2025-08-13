@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gosen Filtre Pro V1</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.0/dist/tesseract.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Gosen Filter Pro</h1>
+
+        <!-- Carrousel de logos -->
+        <div class="logo-carousel-wrapper">
+            <div class="logo-carousel" id="logoCarousel">
+                <img src="logo.webp" alt="Logo Gosen" class="logo-item logo-circle active">
+                <img src="educalims.webp" alt="Logo Educalims" class="logo-item logo-rect">
+            </div>
+        </div>
+
+        <!-- Configuration -->
+        <div class="config-bar">
+            <div class="config-item">
+                <label>Partants</label>
+                <select id="partantsSelect" onchange="generateCombinations()">
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10</option>
+                    <option value="11">11</option>
+                    <option value="12">12</option>
+                    <option value="13">13</option>
+                    <option value="14">14</option>
+                    <option value="15">15</option>
+                    <option value="16">16</option>
+                    <option value="17">17</option>
+                    <option value="18">18</option>
+                    <option value="19">19</option>
+                    <option value="20">20</option>
+                </select>
+            </div>
+            <div class="config-item">
+                <label>Taille</label>
+                <select id="tailleSelect" onchange="generateCombinations()">
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                </select>
+            </div>
+            <div class="config-item">
+                <label>Non-partants</label>
+                <input type="text" id="nonPartantsInput" placeholder="ex: 3,7,12" oninput="generateCombinations()" />
+            </div>
+            <div class="config-item">
+                <label>Petits numéros</label>
+                <input type="number" id="petitLimit" value="10" min="1" max="20" oninput="applyFilters()" />
+            </div>
+        </div>
+
+        <!-- Filtres -->
+        <div class="filters-grid">
+            <!-- Tri Groupe -->
+            <div class="filter-card">
+                <div class="filter-header">
+                    <span class="filter-title">Tri Groupe</span>
+                    <button class="toggle-btn" onclick="toggleFilter('groupe')">Activer</button>
+                    <button class="add-filter-btn" onclick="duplicateFilter('groupe')" title="Dupliquer">+</button>
+                </div>
+
+                <div class="group-input-area" id="groupe-input">
+                    <textarea
+                        placeholder="Collez ou écrivez vos groupes (ex: Favoris: 1 2 3 / Outsiders: 10,11-12 13)"></textarea>
+
+                    <button class="toggle-btn" onclick="document.getElementById('imageInput').click()">📷 Ajouter via
+                        image</button>
+                    <input type="file" id="imageInput" accept="image/*" style="display:none"
+                        onchange="handleImageUpload(event)" />
+
+                    <button class="toggle-btn" onclick="analyzeGroups()">Analyser</button>
+
+                    <div class="group-list" id="groupList"></div>
+
+                    <div class="group-save-area">
+                        <input type="text" id="courseCode" placeholder="Ex: R1C7" />
+                        <input type="date" id="courseDate" />
+                        <button onclick="saveGroupSet()">💾 Sauvegarder</button>
+                        <button onclick="loadGroupSet()">📂 Charger</button>
+                        <select id="savedGroupSelect" onchange="loadSelectedGroup()">
+                            <option value="">-- Choisir une sauvegarde --</option>
+                        </select>
+                    </div>
+
+                    <div class="global-min">
+                        <label>Min global à conserver</label>
+                        <input type="number" id="globalMinInput" min="0" value="3" class="yellow-input"
+                            oninput="updateGlobalMin(this.value)" />
+                    </div>
+
+                    <div id="groupe-filters" class="scroll-frame"></div>
+                </div>
+            </div>
+        </div>
+        <!-- Somme Numérique -->
+        <div class="filter-card">
+            <div class="filter-header">
+                <span class="filter-title">Somme Numérique</span>
+                <button class="toggle-btn" onclick="toggleFilter('somme')">Activer</button>
+                <button class="add-filter-btn" onclick="duplicateFilter('somme')" title="Dupliquer">+</button>
+            </div>
+            <div class="range-inputs" id="somme-range">
+                <div class="range-input-group"><label>Min</label><input type="number" id="sommeMin" value="10"
+                        oninput="applyFilters()" /></div>
+                <div class="range-input-group"><label>Max</label><input type="number" id="sommeMax" value="54"
+                        oninput="applyFilters()" /></div>
+                <label>Séquence personnalisée</label>
+                <input type="text" id="sommeSequence" value="1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16"
+                    oninput="applyFilters()" placeholder="1,2,3..." />
+            </div>
+            <div id="somme-filters"></div>
+        </div>
+
+        <!-- Autres filtres -->
+        <div class="filter-card">
+            <div class="filter-header"><span class="filter-title">Pairs</span><button class="toggle-btn"
+                    onclick="toggleFilter('pairs')">Activer</button></div>
+            <div class="range-inputs" id="pairs-range">
+                <div class="range-input-group"><label>Min</label><input type="number" id="pairsMin" min="0" max="8"
+                        value="0" oninput="applyFilters()" /></div>
+                <div class="range-input-group"><label>Max</label><input type="number" id="pairsMax" min="0" max="8"
+                        value="8" oninput="applyFilters()" /></div>
+            </div>
+        </div>
+
+        <div class="filter-card">
+            <div class="filter-header"><span class="filter-title">Impairs</span><button class="toggle-btn"
+                    onclick="toggleFilter('impairs')">Activer</button></div>
+            <div class="range-inputs" id="impairs-range">
+                <div class="range-input-group"><label>Min</label><input type="number" id="impairsMin" min="0" max="8"
+                        value="0" oninput="applyFilters()" /></div>
+                <div class="range-input-group"><label>Max</label><input type="number" id="impairsMax" min="0" max="8"
+                        value="8" oninput="applyFilters()" /></div>
+            </div>
+        </div>
+
+        <div class="filter-card">
+            <div class="filter-header"><span class="filter-title">Petits Numéros</span><button class="toggle-btn"
+                    onclick="toggleFilter('petits')">Activer</button></div>
+            <div class="range-inputs" id="petits-range">
+                <div class="range-input-group"><label>Min</label><input type="number" id="petitsMin" min="0" max="8"
+                        value="0" oninput="applyFilters()" /></div>
+                <div class="range-input-group"><label>Max</label><input type="number" id="petitsMax" min="0" max="8"
+                        value="8" oninput="applyFilters()" /></div>
+            </div>
+        </div>
+
+        <div class="filter-card">
+            <div class="filter-header"><span class="filter-title">Grands Numéros</span><button class="toggle-btn"
+                    onclick="toggleFilter('grands')">Activer</button></div>
+            <div class="range-inputs" id="grands-range">
+                <div class="range-input-group"><label>Min</label><input type="number" id="grandsMin" min="0" max="8"
+                        value="0" oninput="applyFilters()" /></div>
+                <div class="range-input-group"><label>Max</label><input type="number" id="grandsMax" min="0" max="8"
+                        value="8" oninput="applyFilters()" /></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Barre de recherche + combinaisons -->
+    <input type="text" class="search-box" id="searchBox" placeholder="Rechercher des numéros (ex: 3 7 12)"
+        oninput="searchNumbers(this.value)" />
+    <div class="combinations-area">
+        <div class="combinations-list" id="combinationsList"></div>
+    </div>
+
+    <!-- Boutons flottants -->
+    <div class="floating-btn" id="resetBtn" onclick="resetAll()" title="Réinitialiser">↻</div>
+    <div class="floating-counter" id="counter" onclick="showStats()" title="Statistiques">0/0</div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
+
+
+
+:root {
+    --green: #00ff88;
+    --yellow: #ffdd00;
+    --blue: #00aaff;
+    --black: #0a0a0a;
+    --dark-glass: rgba(0, 0, 0, 0.5);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --text: #e0e0e0;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, var(--black), #0f0f0f);
+    color: var(--text);
+    padding: 20px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: auto;
+}
+
+h1 {
+    text-align: center;
+    font-size: 2.5rem;
+    background: linear-gradient(45deg, var(--green), var(--blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 30px;
+}
+
+.config-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.config-item {
+    background: var(--dark-glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 15px;
+    padding: 15px 20px;
+    backdrop-filter: blur(10px);
+}
+
+.config-item label {
+    color: var(--yellow);
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+.config-item input,
+.config-item select {
+    background: rgba(0, 0, 0, 0.4);
+    color: var(--text);
+    border: 1px solid var(--blue);
+    padding: 8px 12px;
+    border-radius: 10px;
+}
+
+.filters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 25px;
+    margin-bottom: 40px;
+}
+
+.filter-card {
+    background: var(--dark-glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 20px;
+    backdrop-filter: blur(12px);
+}
+
+.filter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.filter-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--yellow);
+}
+
+.toggle-btn {
+    background: linear-gradient(135deg, var(--blue), var(--green));
+    color: var(--black);
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+.toggle-btn.active {
+    background: var(--green);
+}
+
+.range-inputs {
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.range-inputs.active {
+    display: flex;
+}
+
+.range-input-group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.range-input-group label {
+    color: var(--blue);
+    font-weight: bold;
+    min-width: 40px;
+}
+
+.range-input-group input {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.4);
+    color: var(--text);
+    border: 1px solid var(--blue);
+    padding: 8px;
+    border-radius: 10px;
+}
+
+textarea {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    color: var(--text);
+    border: 1px solid var(--blue);
+    padding: 12px;
+    border-radius: 10px;
+    resize: vertical;
+    min-height: 80px;
+}
+
+.combinations-area {
+    background: var(--dark-glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 20px;
+    max-height: 500px; /* hauteur fixe */
+    overflow-y: auto;  /* barre de défilement */
+}
+
+.combinations-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 15px;
+}
+
+.combination-item {
+    background: rgba(0, 0, 0, 0.5);
+    border-left: 3px solid var(--green);
+    padding: 10px;
+    border-radius: 10px;
+    font-family: 'Courier New', monospace;
+}
+
+.large.blue {
+    border: 1px solid var(--yellow);
+    border-radius: 50%;
+    padding: 2px 4px;
+    margin: 0 2px;
+    color: var(--blue);
+    font-weight: bold;
+}
+
+.search-box {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    color: var(--text);
+    border: 1px solid var(--blue);
+    padding: 10px;
+    border-radius: 25px;
+    margin-bottom: 15px;
+    font-size: 1rem;
+}
+
+.group-frame {
+    border: 1px solid var(--green);
+    border-radius: 15px;
+    padding: 15px;
+    margin-top: 15px;
+    max-height: 300px;
+    overflow-y: auto;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.global-min {
+    margin-bottom: 10px;
+}
+
+.global-min label {
+    color: var(--yellow);
+    margin-right: 5px;
+}
+
+.yellow-input {
+    background: var(--yellow);
+    color: var(--black);
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.add-filter-btn {
+    background: var(--yellow);
+    color: var(--black);
+    border: none;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.remove-filter-btn {
+    background: var(--blue);
+    color: var(--black);
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    margin-left: 5px;
+}
+
+/* Boutons flottants */
+.floating-counter {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, var(--green), var(--yellow));
+    color: var(--black);
+    padding: 12px 20px;
+    border-radius: 50%;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 1000;
+    box-shadow: 0 0 10px var(--green);
+    user-select: none;
+}
+
+.floating-btn {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background: linear-gradient(135deg, var(--yellow), var(--green));
+    color: var(--black);
+    padding: 12px 20px;
+    border-radius: 50%;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 1000;
+    box-shadow: 0 0 10px var(--yellow);
+    user-select: none;
+}
+
+/* Carrousel */
+.logo-carousel-wrapper {
+    overflow: hidden;
+    width: 100%;
+    height: 100px;
+    position: relative;
+}
+
+.logo-carousel {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    animation: scrollLogos 20s linear infinite;
+    white-space: nowrap;
+}
+
+.logo-item {
+    height: 80px;
+    width: auto;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.logo-circle {
+    border-radius: 50%;
+    border: 2px solid var(--green);
+    box-shadow: 0 0 10px var(--green);
+}
+
+.logo-rect {
+    border-radius: 10px;
+    border: 2px solid var(--green);
+    box-shadow: 0 0 10px var(--green);
+}
+
+.logo-item.active {
+    transform: scale(1.1);
+    box-shadow: 0 0 25px var(--yellow);
+    border-color: var(--yellow);
+}
+
+@keyframes scrollLogos {
+    0% {
+        transform: translateX(100vw);
+    }
+    100% {
+        transform: translateX(-100%);
+    }
+}
+
+.config-item input[type="text"] {
+    background: rgba(0, 0, 0, 0.4);
+    color: var(--text);
+    border: 1px solid var(--blue);
+    padding: 8px 12px;
+    border-radius: 10px;
+    min-width: 120px;
+}
+
+.config-item input[type="text"]:focus {
+    outline: none;
+    border-color: var(--green);
+    box-shadow: 0 0 5px var(--green);
+}
+
+.scroll-frame {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid var(--green);
+    padding: 10px;
+    margin-top: 10px;
+}
+
+.group-save-area {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.group-save-area input,
+.group-save-area select,
+.group-save-area button {
+  background: rgba(0, 0, 0, 0.4);
+  color: var(--text);
+  border: 1px solid var(--blue);
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+}
+
+.group-save-area button {
+  background: var(--green);
+  color: var(--black);
+  cursor: pointer;
+}
+
+
+
+
+// =========  VARIABLES GLOBALES =========
+let allCombinations   = [];
+let filteredCombinations = [];
+let sommeSequence     = [];
+let groupData         = [];
+let groupGlobalMin    = 3;
+
+const petitLimitInput = document.getElementById('petitLimit');
+
+// =========  GÉNÉRATION DES COMBINAISONS =========
+function generateCombinations() {
+    const totalPartants = parseInt(document.getElementById('partantsSelect').value);
+    const taille        = parseInt(document.getElementById('tailleSelect').value);
+
+    // Non-partants : espaces, virgules ou tirets
+    const nonPartantsRaw = document.getElementById('nonPartantsInput').value;
+    const nonPartants = nonPartantsRaw
+        .split(/[\s,\-]+/)
+        .map(n => parseInt(n.trim()))
+        .filter(n => !isNaN(n) && n >= 1 && n <= totalPartants);
+
+    // Partants effectifs
+    const partantsEffectifs = [];
+    for (let i = 1; i <= totalPartants; i++) {
+        if (!nonPartants.includes(i)) partantsEffectifs.push(i);
+    }
+
+    allCombinations.length = 0;
+
+    const helper = (startIndex, combo) => {
+        if (combo.length === taille) {
+            allCombinations.push([...combo]);
+            return;
+        }
+        for (let i = startIndex; i < partantsEffectifs.length; i++) {
+            combo.push(partantsEffectifs[i]);
+            helper(i + 1, combo);
+            combo.pop();
+        }
+    };
+
+    if (partantsEffectifs.length >= taille) {
+        helper(0, []);
+    }
+
+    updateSommeSequence();
+    applyFilters();
+    updateDisplay();
+    updateCounter();
+
+    if (partantsEffectifs.length < taille) {
+        alert(`Attention : seulement ${partantsEffectifs.length} partants pour une taille de ${taille}`);
+    }
+}
+
+// =========  MISE À JOUR SÉQUENCE SOMME =========
+function updateSommeSequence() {
+    const partants = parseInt(document.getElementById('partantsSelect').value);
+    sommeSequence = Array.from({ length: partants }, (_, i) => i + 1);
+    document.getElementById('sommeSequence').value = sommeSequence.join(', ');
+}
+
+// =========  TOGGLE FILTRES =========
+function toggleFilter(name) {
+    const btn   = event.target;
+    const range = document.getElementById(name + '-range');
+    btn.classList.toggle('active');
+    range?.classList.toggle('active');
+    applyFilters();
+}
+
+// =========  MIN GLOBAL & INDIVIDUEL =========
+function updateGlobalMin(val) {
+    groupGlobalMin = parseInt(val) || 0;
+    document.querySelectorAll('#groupe-filters input[data-group]').forEach(el => {
+        el.value = groupGlobalMin;
+        updateGroupMin(el);
+    });
+}
+
+function updateGroupMin(input) {
+    const id    = input.dataset.group;
+    const group = groupData.find(g => g.id === id);
+    if (group) {
+        group.min = Math.max(0, Math.min(parseInt(input.value) || 0, group.numbers.length));
+    }
+    applyFilters();
+}
+
+// =========  ANALYSE TEXTE / IMAGE =========
+function analyzeGroups() {
+    const rawText = document.querySelector('#groupe-input textarea').value;
+    const groupRegex = /([^\d\n:]+):?([\d\s\-,]+)/g;
+    let match;
+    groupData.length = 0;
+
+    while ((match = groupRegex.exec(rawText)) !== null) {
+        const label = match[1].trim() || `Groupe ${groupData.length + 1}`;
+        const nums  = match[2].match(/\d+/g)?.map(Number).filter(n => n >= 1 && n <= 20);
+        if (nums && nums.length) {
+            groupData.push({
+                id: `groupe-${Date.now()}-${groupData.length}`,
+                label,
+                numbers: [...new Set(nums)],
+                min: groupGlobalMin
+            });
+        }
+    }
+    renderGroupList();
+    autoSelectAllGroups();
+    applyFilters();
+}
+
+// =========  AFFICHAGE LISTE DES GROUPES =========
+function renderGroupList() {
+    const list = document.getElementById('groupList');
+    list.innerHTML = groupData.map(g => `<div class="group-item"><strong>${g.label}</strong>: ${g.numbers.join(' - ')}</div>`).join('');
+}
+
+// =========  CRÉATION DES INPUTS MIN PAR GROUPE =========
+function autoSelectAllGroups() {
+    const container = document.getElementById('groupe-filters');
+    container.innerHTML = '';
+    groupData.forEach(g => {
+        const div = document.createElement('div');
+        div.className = 'filter-instance';
+        div.innerHTML = `
+            <label>${g.label} – Min</label>
+            <input type="number" min="0" max="${g.numbers.length}" value="${g.min}" data-group="${g.id}" oninput="updateGroupMin(this)" />
+        `;
+        container.appendChild(div);
+    });
+}
+
+// =========  AJOUT MANUEL D’UN GROUPE =========
+function addManualGroup() {
+    const label   = prompt("Nom du groupe (ex: Favoris) :");
+    if (!label) return;
+
+    const numbers = prompt("Numéros (séparés par espaces, tirets ou virgules) :");
+    if (!numbers) return;
+
+    const nums = numbers.split(/[\s,\-]+/).map(Number).filter(n => !isNaN(n) && n >= 1 && n <= 20);
+    if (!nums.length) return;
+
+    groupData.push({
+        id: `groupe-manuel-${Date.now()}`,
+        label,
+        numbers: [...new Set(nums)],
+        min: groupGlobalMin
+    });
+
+    renderGroupList();
+    autoSelectAllGroups();
+    applyFilters();
+}
+
+// =========  IMPORT IMAGE (Android / Desktop) =========
+function handleImageUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    Tesseract.recognize(file, 'eng+fra', { logger: () => {} })
+        .then(({ data: { text } }) => {
+            document.querySelector('#groupe-input textarea').value = text;
+            analyzeGroups();
+        });
+}
+
+// =========  DUPLICATION DE FILTRES =========
+function duplicateFilter(type) {
+    if (type === 'somme') {
+        const container = document.getElementById('somme-filters');
+        const div = document.createElement('div');
+        div.className = 'filter-instance';
+        div.innerHTML = `
+            <button class="remove-filter-btn" onclick="this.parentElement.remove();applyFilters()">×</button>
+            <label>Somme – Min/Max</label>
+            <div class="range-input-group">
+                <label>Min</label><input type="number" min="0" oninput="applyFilters()" />
+            </div>
+            <div class="range-input-group">
+                <label>Max</label><input type="number" min="0" oninput="applyFilters()" />
+            </div>
+        `;
+        container.appendChild(div);
+    }
+    if (type === 'groupe') {
+        const container = document.getElementById('groupe-filters');
+        const div = document.createElement('div');
+        div.className = 'filter-instance';
+        div.innerHTML = `
+            <button class="remove-filter-btn" onclick="this.parentElement.remove();applyFilters()">×</button>
+            <label>Groupe – Min à conserver</label>
+            <input type="number" min="0" max="8" value="${groupGlobalMin}" oninput="applyFilters()" />
+        `;
+        container.appendChild(div);
+    }
+}
+
+// =========  APPLICATION DES FILTRES =========
+function applyFilters() {
+    filteredCombinations = [...allCombinations];
+    const petitLimit = parseInt(petitLimitInput.value);
+    const seq = document.getElementById('sommeSequence')?.value.split(',').map(Number) || sommeSequence;
+
+    // Somme numérique
+    if (document.getElementById('somme-range')?.classList.contains('active')) {
+        const min = parseInt(document.getElementById('sommeMin')?.value || 0);
+        const max = parseInt(document.getElementById('sommeMax')?.value || 0);
+        filteredCombinations = filteredCombinations.filter(c => {
+            const sum = c.reduce((a, b) => a + (seq[b - 1] || b), 0);
+            return sum >= min && sum <= max;
+        });
+    }
+    document.querySelectorAll('#somme-filters .filter-instance').forEach(div => {
+        const min = parseInt(div.querySelector('input:nth-of-type(1)')?.value || 0);
+        const max = parseInt(div.querySelector('input:nth-of-type(2)')?.value || 0);
+        filteredCombinations = filteredCombinations.filter(c => {
+            const sum = c.reduce((a, b) => a + (seq[b - 1] || b), 0);
+            return sum >= min && sum <= max;
+        });
+    });
+
+    // Pairs / Impairs / Petits / Grands
+    ['pairs', 'impairs', 'petits', 'grands'].forEach(id => {
+        if (document.getElementById(id + '-range')?.classList.contains('active')) {
+            const min = parseInt(document.getElementById(id + 'Min')?.value || 0);
+            const max = parseInt(document.getElementById(id + 'Max')?.value || 8);
+            let fn;
+            switch (id) {
+                case 'pairs':   fn = c => c.filter(n => n % 2 === 0).length; break;
+                case 'impairs': fn = c => c.filter(n => n % 2 === 1).length; break;
+                case 'petits':  fn = c => c.filter(n => n <= petitLimit).length; break;
+                case 'grands':  fn = c => c.filter(n => n > petitLimit).length; break;
+            }
+            filteredCombinations = filteredCombinations.filter(c => fn(c) >= min && fn(c) <= max);
+        }
+    });
+
+    // Tri par groupes
+    if (groupData.length) {
+        filteredCombinations = filteredCombinations.filter(combo =>
+            groupData.every(group => combo.filter(n => group.numbers.includes(n)).length >= group.min)
+        );
+    }
+
+    updateDisplay();
+    updateCounter();
+}
+
+// =========  AFFICHAGE & UTILITAIRES =========
+function updateDisplay() {
+    const list = document.getElementById('combinationsList');
+    list.innerHTML = '';
+
+    const html = filteredCombinations.slice(0, 1000)
+        .map(combo => `<div class="combination-item">${combo.map(n => `<span class="large blue">${n}</span>`).join(' ')}</div>`)
+        .join('');
+
+    list.innerHTML = html;
+    if (filteredCombinations.length > 1000) {
+        list.innerHTML += `<div style="text-align:center;color:#ffdd00;">... et ${filteredCombinations.length - 1000} autres</div>`;
+    }
+}
+
+function searchNumbers(query) {
+    const nums = query.split(/\s+/).map(Number).filter(n => !isNaN(n));
+    if (!nums.length) { updateDisplay(); return; }
+    const list = document.getElementById('combinationsList');
+    const filtered = allCombinations.filter(combo => nums.every(n => combo.includes(n)));
+    list.innerHTML = filtered.slice(0, 100).map(combo => `<div class="combination-item">${combo.map(n => `<span class="large blue">${n}</span>`).join(' ')}</div>`).join('');
+}
+
+function updateCounter() {
+    document.getElementById('counter').textContent = `${filteredCombinations.length}/${allCombinations.length}`;
+}
+
+function showStats() {
+    const freq = {};
+    filteredCombinations.flat().forEach(n => freq[n] = (freq[n] || 0) + 1);
+    const sorted = Object.entries(freq).sort((a, b) => a[1] - b[1]);
+
+    const groupFreq = {};
+    groupData.flatMap(g => g.numbers).forEach(n => groupFreq[n] = (groupFreq[n] || 0) + 1);
+    const groupSorted = Object.entries(groupFreq).sort((a, b) => a[1] - b[1]);
+
+    alert(
+        "📈 Arrivée générale (ordre croissant):\n" +
+        sorted.map(([n, c]) => `Cheval ${n}: ${c} fois`).join('\n') +
+        "\n\n📊 Chevaux présents dans les groupes:\n" +
+        groupSorted.map(([n, c]) => `Cheval ${n}: ${c} fois`).join('\n') +
+        `\n\nTotal combinaisons: ${filteredCombinations.length}\nRéduction: ${((1 - filteredCombinations.length / allCombinations.length) * 100).toFixed(1)}%`
+    );
+}
+
+function resetAll() {
+    location.reload();
+}
+
+// =========  INITIALISATIONS =========
+window.addEventListener('load', () => {
+    document.getElementById('logoCarousel').style.animationPlayState = 'running';
+    generateCombinations();
+});
+
+// Sauvegarder les groupes actuels
+function saveGroupSet() {
+  const code = document.getElementById('courseCode').value.trim();
+  const date = document.getElementById('courseDate').value;
+  if (!code || !date) {
+    alert("Veuillez entrer un code de course et une date.");
+    return;
+  }
+
+  const key = `gosen-${code}-${date}`;
+  const data = {
+    code,
+    date,
+    groups: groupData,
+    timestamp: Date.now()
+  };
+
+  localStorage.setItem(key, JSON.stringify(data));
+  updateSavedGroupSelect();
+  alert("Groupes sauvegardés avec succès !");
+}
+
+function groupDataToText(groups) {
+  return groups.map(g => `${g.label}: ${g.numbers.join(' ')}`).join('\n');
+}
+
+// Charger une sauvegarde sélectionnée
+function loadSelectedGroup() {
+  const select = document.getElementById('savedGroupSelect');
+  const key = select.value;
+  if (!key) return;
+
+  const data = JSON.parse(localStorage.getItem(key));
+  if (!data) {
+    alert("Aucune donnée trouvée.");
+    return;
+  }
+
+  // ✅ Charger les groupes
+  groupData = data.groups || [];
+  renderGroupList();
+  autoSelectAllGroups();
+  applyFilters();
+
+  // ✅ Remplir les champs
+  document.getElementById('courseCode').value = data.code;
+  document.getElementById('courseDate').value = data.date;
+
+  // ✅ Réécrire dans la zone de texte
+  const textarea = document.querySelector('#groupe-input textarea');
+  textarea.value = groupDataToText(groupData);
+}
+
+// Mettre à jour la liste déroulante des sauvegardes
+function updateSavedGroupSelect() {
+  const select = document.getElementById('savedGroupSelect');
+  select.innerHTML = '<option value="">-- Choisir une sauvegarde --</option>';
+
+  const keys = Object.keys(localStorage).filter(k => k.startsWith("gosen-"));
+  keys.sort((a, b) => {
+    return JSON.parse(localStorage.getItem(b)).timestamp - JSON.parse(localStorage.getItem(a)).timestamp;
+  });
+
+  keys.forEach(key => {
+    const data = JSON.parse(localStorage.getItem(key));
+    const option = document.createElement("option");
+    option.value = key;
+    option.textContent = `${data.code} - ${data.date}`;
+    select.appendChild(option);
+  });
+}
+
+// Initialiser la liste au chargement
+window.addEventListener("load", () => {
+  document.getElementById("courseDate").valueAsDate = new Date();
+  updateSavedGroupSelect();
+});
